@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit' if record else 'Add' }} record{% endblock %}
+{% block content %}
+<h1 class="h3 mb-3">{{ 'Edit record' if record else 'Add record' }}</h1>
+<div class="card" style="max-width: 720px;">
+  <div class="card-body">
+    <form method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label" for="transaction_type">Transaction type</label>
+          <select class="form-select" id="transaction_type" name="transaction_type" required>
+            {% for t in TRANSACTION_TYPES %}
+              <option value="{{ t }}" {{ 'selected' if form.get('transaction_type') == t }}>{{ TYPE_LABELS[t] }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label" for="date">Date</label>
+          <input class="form-control" type="date" id="date" name="date" value="{{ form.get('date', '') }}" required>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label" for="category">Category</label>
+          <input class="form-control" id="category" name="category" maxlength="60" placeholder="e.g. Inventory, Rent, Sales" value="{{ form.get('category', '') }}" required>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label" for="description">Description</label>
+          <input class="form-control" id="description" name="description" maxlength="200" value="{{ form.get('description', '') }}">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label" for="planned_amount">Planned amount (₹)</label>
+          <input class="form-control" type="number" step="0.01" min="0" id="planned_amount" name="planned_amount" value="{{ form.get('planned_amount', '') }}">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label" for="actual_amount">Actual amount (₹)</label>
+          <input class="form-control" type="number" step="0.01" min="0" id="actual_amount" name="actual_amount" value="{{ form.get('actual_amount', '') }}" required>
+        </div>
+        <div class="col-12">
+          <label class="form-label" for="notes">Notes</label>
+          <textarea class="form-control" id="notes" name="notes" rows="2" maxlength="500">{{ form.get('notes', '') }}</textarea>
+        </div>
+      </div>
+      <div class="mt-4 d-flex gap-2">
+        <button class="btn btn-primary">Save</button>
+        <a class="btn btn-outline-secondary" href="{{ url_for('records.list_records') }}">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

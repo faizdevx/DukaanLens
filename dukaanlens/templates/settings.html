@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Settings{% endblock %}
+{% block content %}
+<h1 class="h3 mb-3">Settings</h1>
+<div class="row g-3">
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-header">Shop details</div>
+      <div class="card-body">
+        <form method="post">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <input type="hidden" name="action" value="shop">
+          <div class="mb-3">
+            <label class="form-label" for="name">Shop name</label>
+            <input class="form-control" id="name" name="name" maxlength="80" value="{{ request.form.get('name', shop.name) }}" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="established_on">Established on</label>
+            <input class="form-control" type="date" id="established_on" name="established_on" value="{{ request.form.get('established_on', shop.established_on.isoformat()) }}" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="starting_capital">Starting capital (₹)</label>
+            <input class="form-control" type="number" step="0.01" min="0" id="starting_capital" name="starting_capital" value="{{ request.form.get('starting_capital', shop.starting_capital) }}" required>
+          </div>
+          <button class="btn btn-primary">Save shop details</button>
+        </form>
+        <p class="text-muted small mt-3 mb-0">Your opening revenue, COGS, expenses and withdrawals
+          were saved as records. Edit them under Financial Records (category "Opening balance").</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-header">Change password</div>
+      <div class="card-body">
+        <form method="post">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <input type="hidden" name="action" value="password">
+          <div class="mb-3">
+            <label class="form-label" for="current_password">Current password</label>
+            <input class="form-control" type="password" id="current_password" name="current_password" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="new_password">New password</label>
+            <input class="form-control" type="password" id="new_password" name="new_password" minlength="8" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="confirm_password">Confirm new password</label>
+            <input class="form-control" type="password" id="confirm_password" name="confirm_password" minlength="8" required>
+          </div>
+          <button class="btn btn-primary">Change password</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

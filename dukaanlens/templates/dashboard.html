@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% macro card(label, value, hint='', tone='') %}
+  <div class="col-6 col-xl-3">
+    <div class="card metric h-100 {{ tone }}">
+      <div class="card-body">
+        <div class="metric-label">{{ label }}</div>
+        <div class="metric-value">{{ money(value) }}</div>
+        {% if hint %}<div class="metric-hint">{{ hint }}</div>{% endif %}
+      </div>
+    </div>
+  </div>
+{% endmacro %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+  <h1 class="h3 mb-0">Dashboard</h1>
+  <div class="btn-group" role="group" aria-label="Period">
+    {% for key, label in period_options %}
+      <a class="btn btn-sm {{ 'btn-primary' if key == period_key else 'btn-outline-primary' }}" href="{{ url_for('main.dashboard', period=key) }}">{{ label }}</a>
+    {% endfor %}
+  </div>
+</div>
+
+{% if record_count == 0 %}
+  <div class="empty-state">
+    <i class="bi bi-inbox"></i>
+    <h2 class="h5">No records yet</h2>
+    <p>Add your first sale or expense to see your numbers here.</p>
+    <a class="btn btn-primary" href="{{ url_for('records.create') }}">Add a record</a>
+  </div>
+{% else %}
+  <p class="text-muted small mb-2">Showing: <strong>{{ period.label }}</strong></p>
+  <div class="row g-3 mb-4">
+    {{ card('Revenue', period_metrics.revenue) }}
+    {{ card('COGS', period_metrics.cogs, 'Cost of goods sold') }}
+    {{ card('Gross profit', period_metrics.gross_profit, 'Revenue − COGS') }}
+    {{ card('Operating expenses', period_metrics.expenses) }}
+    {{ card('Net profit', period_metrics.net_profit, 'Revenue − COGS − expenses', 'profit-pos' if period_metrics.net_profit >= 0 else 'profit-neg') }}
+    {{ card('Owner withdrawals', period_metrics.withdrawals, 'Kept separate from profit') }}
+    {{ card('Starting capital', metrics.starting_capital) }}
+    {{ card('Estimated cash (all time)', metrics.estimated_cash, 'ESTIMATE: capital + net profit − withdrawals. Assumes all sales and costs were paid in cash.', 'estimate') }}
+  </div>
+
+  <div class="row g-3">
+    <div class="col-lg-8">
+      <div class="card h-100">
+        <div class="card-header">Revenue vs costs by month (last 12 months)</div>
+        <div class="card-body">
+          <canvas id="monthlyChart" height="120"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="card mb-3">
+        <div class="card-header">Budget alerts (this month)</div>
+        <ul class="list-group list-group-flush">
+          {% for a in alerts %}
+            <li class="list-group-item d-flex justify-content-between">
+              <span><i class="bi bi-exclamation-triangle text-danger"></i> {{ a.category }}</span>
+              <span class="text-danger">{{ money(a.spent) }} / {{ money(a.limit_amount) }}</span>
+            </li>
+          {% else %}
+            <li class="list-group-item text-muted">No budget is over its limit this month.</li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-header">Recent records</div>
+        <ul class="list-group list-group-flush">
+          {% for r in recent %}
+            <li class="list-group-item d-flex justify-content-between">
+              <span>{{ r.category }}<br><small class="text-muted">{{ r.date }} · {{ r.type_label }}</small></span>
+              <span>{{ money(r.actual_amount) }}</span>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+{% if record_count > 0 %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script id="chart-data" type="application/json">{{ summary | tojson }}</script>
+<script>
+  const rows = JSON.parse(document.getElementById('chart-data').textContent);
+  new Chart(document.getElementById('monthlyChart'), {
+    type: 'bar',
+    data: {
+      labels: rows.map(r => r.month),
+      datasets: [
+        { label: 'Revenue', data: rows.map(r => r.revenue), backgroundColor: '#198754' },
+        { label: 'COGS + expenses', data: rows.map(r => r.costs), backgroundColor: '#dc3545' }
+      ]
+    },
+    options: { scales: { y: { beginAtZero: true } } }
+  });
+</script>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Set up your shop{% endblock %}
+{% block content %}
+<div class="card shadow-sm mx-auto" style="max-width: 640px;">
+  <div class="card-body p-4">
+    <h1 class="h3">Set up your shop</h1>
+    <p class="text-muted">Tell us a little about your shop. Numbers can be rough; you can add real records later.
+      Leave a number empty if you don't know it.</p>
+    <form method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <div class="row g-3">
+        <div class="col-md-8">
+          <label class="form-label" for="name">Shop name</label>
+          <input class="form-control" id="name" name="name" value="{{ form.get('name', '') }}" maxlength="80" required>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label" for="established_on">Established on</label>
+          <input class="form-control" type="date" id="established_on" name="established_on" max="{{ today }}" value="{{ form.get('established_on', '') }}" required>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label" for="starting_capital">Starting capital (₹)</label>
+          <input class="form-control" type="number" step="0.01" min="0" id="starting_capital" name="starting_capital" value="{{ form.get('starting_capital', '') }}" required>
+          <div class="form-text">Money you put in to start the shop.</div>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label" for="revenue">Revenue so far (₹)</label>
+          <input class="form-control" type="number" step="0.01" min="0" id="revenue" name="revenue" value="{{ form.get('revenue', '') }}">
+          <div class="form-text">Total sales.</div>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label" for="cogs">COGS (₹)</label>
+          <input class="form-control" type="number" step="0.01" min="0" id="cogs" name="cogs" value="{{ form.get('cogs', '') }}">
+          <div class="form-text">What the goods you sold cost you.</div>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label" for="operating_expenses">Operating expenses (₹)</label>
+          <input class="form-control" type="number" step="0.01" min="0" id="operating_expenses" name="operating_expenses" value="{{ form.get('operating_expenses', '') }}">
+          <div class="form-text">Rent, salaries, electricity, etc.</div>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label" for="owner_withdrawals">Owner withdrawals (₹)</label>
+          <input class="form-control" type="number" step="0.01" min="0" id="owner_withdrawals" name="owner_withdrawals" value="{{ form.get('owner_withdrawals', '') }}">
+          <div class="form-text">Money you took out for yourself. This is not an expense.</div>
+        </div>
+      </div>
+      <button class="btn btn-primary mt-4">Create my shop</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

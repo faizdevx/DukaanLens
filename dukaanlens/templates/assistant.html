@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Ask DukaanLens{% endblock %}
+{% block content %}
+<h1 class="h3 mb-1">Ask DukaanLens</h1>
+<p class="text-muted">Ask about your own numbers in plain English. Answers come from fixed, read-only
+  queries on your data, and you can see the exact SQL used.</p>
+
+<div class="card chat-card">
+  <div id="chat-log" class="chat-log">
+    <div class="bubble bot">
+      Hi! Ask me something like:
+      <div class="chips mt-2">
+        {% for s in suggestions %}<button type="button" class="btn btn-sm btn-outline-primary chip">{{ s }}</button>{% endfor %}
+      </div>
+    </div>
+  </div>
+  <form id="chat-form" class="chat-input" autocomplete="off">
+    <input id="chat-message" class="form-control" maxlength="300" placeholder="Type your question..." required>
+    <button class="btn btn-primary"><i class="bi bi-send"></i> Ask</button>
+  </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>window.CSRF_TOKEN = {{ csrf_token | tojson }}; window.ASK_URL = {{ url_for('chat.ask') | tojson }};</script>
+<script src="{{ url_for('static', filename='js/assistant.js') }}"></script>
+{% endblock %}

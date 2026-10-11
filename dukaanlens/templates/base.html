@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}DukaanLens{% endblock %} · DukaanLens</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+</head>
+<body>
+{% set show_sidebar = current_user.is_authenticated and current_user.shop %}
+{% if show_sidebar %}
+<nav class="navbar navbar-dark bg-dark d-md-none">
+  <div class="container-fluid">
+    <span class="navbar-brand"><i class="bi bi-shop"></i> DukaanLens</span>
+    <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#sidebar" aria-label="Menu">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+  </div>
+</nav>
+<div class="app-shell">
+  <aside id="sidebar" class="sidebar collapse d-md-flex flex-column">
+    <div class="brand d-none d-md-block"><i class="bi bi-shop"></i> DukaanLens</div>
+    <div class="shop-name">{{ current_user.shop.name }}</div>
+    {% set ep = request.endpoint or '' %}
+    <ul class="nav flex-column mb-auto">
+      <li><a class="nav-link {{ 'active' if ep == 'main.dashboard' }}" href="{{ url_for('main.dashboard') }}"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+      <li><a class="nav-link {{ 'active' if ep.startswith('records.') }}" href="{{ url_for('records.list_records') }}"><i class="bi bi-journal-text"></i> Financial Records</a></li>
+      <li><a class="nav-link {{ 'active' if ep.startswith('budgets.') }}" href="{{ url_for('budgets.list_budgets') }}"><i class="bi bi-piggy-bank"></i> Budget Sheets</a></li>
+      <li><a class="nav-link {{ 'active' if ep.startswith('chat.') }}" href="{{ url_for('chat.page') }}"><i class="bi bi-chat-dots"></i> Ask DukaanLens</a></li>
+      <li><a class="nav-link {{ 'active' if ep == 'main.settings' }}" href="{{ url_for('main.settings') }}"><i class="bi bi-gear"></i> Settings</a></li>
+    </ul>
+    <form method="post" action="{{ url_for('auth.logout') }}" class="mt-3">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <button class="btn btn-outline-light btn-sm w-100"><i class="bi bi-box-arrow-left"></i> Log out ({{ current_user.username }})</button>
+    </form>
+  </aside>
+  <main class="content">
+{% else %}
+<main class="container py-4 plain-page">
+{% endif %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+          {{ message }}<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endfor %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </main>
+{% if show_sidebar %}</div>{% endif %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

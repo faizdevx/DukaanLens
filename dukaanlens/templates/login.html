@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Log in{% endblock %}
+{% block content %}
+<div class="auth-card card shadow-sm mx-auto">
+  <div class="card-body p-4">
+    <h1 class="h3 mb-1"><i class="bi bi-shop"></i> DukaanLens</h1>
+    <p class="text-muted">Log in to see how your shop is doing.</p>
+    <form method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <div class="mb-3">
+        <label class="form-label" for="identity">Username or email</label>
+        <input class="form-control" id="identity" name="identity" value="{{ identity or '' }}" required autofocus>
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="password">Password</label>
+        <input class="form-control" type="password" id="password" name="password" required>
+      </div>
+      <button class="btn btn-primary w-100">Log in</button>
+    </form>
+    <p class="mt-3 mb-0 text-center">New here? <a href="{{ url_for('auth.register') }}">Create an account</a></p>
+  </div>
+</div>
+{% endblock %}

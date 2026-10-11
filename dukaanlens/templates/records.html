@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}Financial Records{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+  <h1 class="h3 mb-0">Financial Records</h1>
+  <div class="d-flex gap-2">
+    <a class="btn btn-outline-secondary" href="{{ url_for('records.export_csv', **filters) }}"><i class="bi bi-download"></i> Export CSV</a>
+    <a class="btn btn-primary" href="{{ url_for('records.create') }}"><i class="bi bi-plus-lg"></i> Add record</a>
+  </div>
+</div>
+
+<form class="card card-body mb-3" method="get">
+  <div class="row g-2 align-items-end">
+    <div class="col-6 col-md-2">
+      <label class="form-label small" for="type">Type</label>
+      <select class="form-select form-select-sm" id="type" name="type">
+        <option value="">All</option>
+        {% for t in TRANSACTION_TYPES %}
+          <option value="{{ t }}" {{ 'selected' if filters.get('type') == t }}>{{ TYPE_LABELS[t] }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-6 col-md-2">
+      <label class="form-label small" for="category">Category</label>
+      <select class="form-select form-select-sm" id="category" name="category">
+        <option value="">All</option>
+        {% for c in categories %}
+          <option value="{{ c }}" {{ 'selected' if filters.get('category', '').lower() == c.lower() }}>{{ c }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-6 col-md-2">
+      <label class="form-label small" for="date_from">From</label>
+      <input class="form-control form-control-sm" type="date" id="date_from" name="date_from" value="{{ filters.get('date_from', '') }}">
+    </div>
+    <div class="col-6 col-md-2">
+      <label class="form-label small" for="date_to">To</label>
+      <input class="form-control form-control-sm" type="date" id="date_to" name="date_to" value="{{ filters.get('date_to', '') }}">
+    </div>
+    <div class="col-12 col-md-2">
+      <label class="form-label small" for="q">Search</label>
+      <input class="form-control form-control-sm" id="q" name="q" placeholder="description or notes" value="{{ filters.get('q', '') }}">
+    </div>
+    <div class="col-12 col-md-2 d-flex gap-2">
+      <button class="btn btn-sm btn-primary flex-fill">Filter</button>
+      <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('records.list_records') }}">Clear</a>
+    </div>
+  </div>
+</form>
+
+{% if records %}
+<div class="card">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead class="table-light">
+        <tr><th>Date</th><th>Type</th><th>Category</th><th>Description</th>
+            <th class="text-end">Planned</th><th class="text-end">Actual</th><th></th></tr>
+      </thead>
+      <tbody>
+      {% for r in records %}
+        <tr>
+          <td class="text-nowrap">{{ r.date }}</td>
+          <td><span class="badge badge-{{ r.transaction_type }}">{{ r.type_label }}</span></td>
+          <td>{{ r.category }}</td>
+          <td>{{ r.description }}{% if r.notes %}<br><small class="text-muted">{{ r.notes }}</small>{% endif %}</td>
+          <td class="text-end">{{ money(r.planned_amount) }}</td>
+          <td class="text-end fw-semibold">{{ money(r.actual_amount) }}</td>
+          <td class="text-end text-nowrap">
+            <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('records.edit', record_id=r.id) }}" title="Edit"><i class="bi bi-pencil"></i></a>
+            <form class="d-inline" method="post" action="{{ url_for('records.delete', record_id=r.id) }}" onsubmit="return confirm('Delete this record?');">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+              <button class="btn btn-sm btn-outline-danger" title="Delete"><i class="bi bi-trash"></i></button>
+            </form>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+<p class="text-muted small mt-2">{{ records|length }} record(s)</p>
+{% else %}
+<div class="empty-state">
+  <i class="bi bi-journal-plus"></i>
+  {% if has_filters %}
+    <h2 class="h5">No records match these filters</h2>
+    <a class="btn btn-outline-primary" href="{{ url_for('records.list_records') }}">Clear filters</a>
+  {% else %}
+    <h2 class="h5">No records yet</h2>
+    <p>Record your sales, stock purchases and expenses here.</p>
+    <a class="btn btn-primary" href="{{ url_for('records.create') }}">Add your first record</a>
+  {% endif %}
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}Budget Sheets{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+  <h1 class="h3 mb-0">Budget Sheets</h1>
+  <div class="btn-group">
+    <a class="btn btn-outline-secondary" href="{{ url_for('budgets.list_budgets', month=prev_month) }}"><i class="bi bi-chevron-left"></i></a>
+    <span class="btn btn-light disabled">{{ month_label }}</span>
+    <a class="btn btn-outline-secondary" href="{{ url_for('budgets.list_budgets', month=next_month) }}"><i class="bi bi-chevron-right"></i></a>
+  </div>
+</div>
+<p class="text-muted">A budget is a monthly spending limit for one category. "Spent" adds up your
+  expense and COGS records with the same category in that month.</p>
+
+<div class="row g-3">
+  <div class="col-lg-8">
+    {% if rows %}
+    <div class="card">
+      <div class="table-responsive">
+        <table class="table align-middle mb-0">
+          <thead class="table-light"><tr><th>Category</th><th class="text-end">Limit</th><th class="text-end">Spent</th><th style="min-width:140px">Used</th><th></th></tr></thead>
+          <tbody>
+          {% for row in rows %}
+            <tr>
+              <td>{{ row.budget.category }}{% if row.over %} <span class="badge bg-danger">Over</span>{% endif %}</td>
+              <td class="text-end">{{ money(row.budget.limit_amount) }}</td>
+              <td class="text-end">{{ money(row.spent) }}</td>
+              <td>
+                <div class="progress" role="progressbar" aria-label="Budget used">
+                  <div class="progress-bar {{ 'bg-danger' if row.over else ('bg-warning' if row.percent >= 80 else 'bg-success') }}" style="width: {{ [row.percent, 100]|min }}%">{{ row.percent }}%</div>
+                </div>
+              </td>
+              <td class="text-end text-nowrap">
+                <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('budgets.edit', budget_id=row.budget.id) }}"><i class="bi bi-pencil"></i></a>
+                <form class="d-inline" method="post" action="{{ url_for('budgets.delete', budget_id=row.budget.id) }}" onsubmit="return confirm('Delete this budget?');">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                  <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <i class="bi bi-piggy-bank"></i>
+      <h2 class="h5">No budgets for {{ month_label }}</h2>
+      <p>Add a limit on the right, for example "Electricity ₹2,000".</p>
+    </div>
+    {% endif %}
+  </div>
+  <div class="col-lg-4">
+    <div class="card">
+      <div class="card-header">Add a budget</div>
+      <div class="card-body">
+        <form method="post">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <div class="mb-3">
+            <label class="form-label" for="category">Category</label>
+            <input class="form-control" id="category" name="category" maxlength="60" value="{{ form.get('category', '') }}" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="month">Month</label>
+            <input class="form-control" type="month" id="month" name="month" value="{{ form.get('month', month) }}" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="limit_amount">Limit (₹)</label>
+            <input class="form-control" type="number" step="0.01" min="0" id="limit_amount" name="limit_amount" value="{{ form.get('limit_amount', '') }}" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="notes">Notes</label>
+            <input class="form-control" id="notes" name="notes" maxlength="500" value="{{ form.get('notes', '') }}">
+          </div>
+          <button class="btn btn-primary w-100">Add budget</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

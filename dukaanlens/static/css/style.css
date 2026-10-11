@@ -1,0 +1,39 @@
+body { background: #f4f6f9; }
+.app-shell { display: flex; min-height: 100vh; }
+.sidebar { width: 240px; flex-shrink: 0; background: #212b36; color: #fff; padding: 1.25rem 1rem; }
+.sidebar .brand { font-size: 1.3rem; font-weight: 700; margin-bottom: .25rem; }
+.sidebar .shop-name { color: #9fb0c3; font-size: .85rem; margin-bottom: 1.5rem; }
+.sidebar .nav-link { color: #cfd8e3; border-radius: .5rem; padding: .55rem .75rem; }
+.sidebar .nav-link:hover { background: #2f3b48; color: #fff; }
+.sidebar .nav-link.active { background: #0d6efd; color: #fff; }
+.sidebar .nav-link i { margin-right: .5rem; }
+.content { flex: 1; padding: 1.5rem; min-width: 0; }
+@media (max-width: 767.98px) {
+  .app-shell { display: block; }
+  .sidebar { width: 100%; }
+  .sidebar.collapse:not(.show) { display: none; }
+  .content { padding: 1rem; }
+}
+.auth-card { max-width: 420px; margin-top: 6vh; }
+.metric .metric-label { color: #6c757d; font-size: .8rem; text-transform: uppercase; letter-spacing: .03em; }
+.metric .metric-value { font-size: 1.5rem; font-weight: 700; }
+.metric .metric-hint { color: #6c757d; font-size: .75rem; }
+.metric.profit-pos .metric-value { color: #198754; }
+.metric.profit-neg .metric-value { color: #dc3545; }
+.metric.estimate { border: 1px dashed #6c757d; background: #fffdf5; }
+.empty-state { text-align: center; padding: 3rem 1rem; background: #fff; border: 1px dashed #ced4da; border-radius: .75rem; }
+.empty-state > i { font-size: 2.5rem; color: #adb5bd; }
+.badge-revenue { background: #198754; }
+.badge-cogs { background: #fd7e14; }
+.badge-expense { background: #dc3545; }
+.badge-withdrawal { background: #6f42c1; }
+
+.chat-card { max-width: 900px; }
+.chat-log { height: 55vh; overflow-y: auto; padding: 1rem; display: flex; flex-direction: column; gap: .75rem; }
+.bubble { max-width: 90%; padding: .6rem .9rem; border-radius: .9rem; }
+.bubble.user { align-self: flex-end; background: #0d6efd; color: #fff; }
+.bubble.bot { align-self: flex-start; background: #eef1f5; }
+.bubble table { background: #fff; font-size: .85rem; }
+.bubble pre { background: #212b36; color: #e8eef5; padding: .6rem; border-radius: .5rem; font-size: .75rem; white-space: pre-wrap; }
+.chat-input { display: flex; gap: .5rem; padding: .75rem; border-top: 1px solid #dee2e6; }
+.chips { display: flex; flex-wrap: wrap; gap: .4rem; }
