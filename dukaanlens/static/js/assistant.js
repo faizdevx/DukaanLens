@@ -62,10 +62,13 @@ function renderReply(reply) {
     const pre = document.createElement("pre");
     pre.className = "mt-2 mb-1";
     pre.textContent = reply.sql;
-    const params = document.createElement("small");
-    params.className = "text-muted";
-    params.textContent = "Parameters: " + JSON.stringify(reply.params);
-    details.append(summary, pre, params);
+    details.append(summary, pre);
+    if (reply.params && Object.keys(reply.params).length) {
+      const params = document.createElement("small");
+      params.className = "text-muted";
+      params.textContent = "Parameters: " + JSON.stringify(reply.params);
+      details.appendChild(params);
+    }
     bubble.appendChild(details);
   }
 

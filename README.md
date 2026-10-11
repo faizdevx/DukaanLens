@@ -49,6 +49,70 @@ Run the tests (Gemini is faked in the tests, no key or network needed):
 python -m pytest
 ```
 
+## Example walkthrough
+
+A shop owner signs up, describes the shop, uploads a product CSV and asks questions in plain
+English. The data is a generated sample of 4,000 Indian stationery products
+(`sample_data/indian_stationery_products_4000.csv`: `product_id, product_name, brand, category,
+unit_price_inr, stock_quantity, supplier_city, last_restocked, rating`).
+
+### 1. Sign up
+
+![Register](docs/screenshots/01-register.png)
+
+### 2. Describe the shop (first login)
+
+Example details used: shop name *Sharma Stationery Mart*, established 2021-04-01, starting
+capital ₹1,50,000, revenue ₹4,80,000, COGS ₹2,90,000, operating expenses ₹95,000, owner
+withdrawals ₹60,000.
+
+![Shop setup](docs/screenshots/02-shop-setup.png)
+
+### 3. Dashboard
+
+Gross profit = 480,000 − 290,000 = ₹1,90,000. Net profit = 190,000 − 95,000 = ₹95,000.
+Withdrawals stay separate. Estimated cash is labelled as an estimate.
+
+![Dashboard](docs/screenshots/03-dashboard.png)
+
+### 4. Upload the CSV (the main feature)
+
+Open **Upload Data**, choose the file, optionally name the table, click upload.
+
+![Upload](docs/screenshots/04-upload-csv.png)
+
+DukaanLens creates a real SQLite table (`ut_<your id>_stationery_products`) and detects each
+column's type. Here `unit_price_inr` and `rating` are REAL, `stock_quantity` is INTEGER and
+`last_restocked` is a DATE.
+
+![Table created](docs/screenshots/05-table-created.png)
+
+### 5. Ask in plain English
+
+In **Ask DukaanLens** pick *Uploaded: Stationery products* and type a question. Gemini writes the
+SQL, the sandbox runs it, and you see the answer, the result rows and the exact SQL.
+
+![Ask DukaanLens](docs/screenshots/06-ask-dukaanlens.png)
+
+Real answers from this run (model `gemini-2.5-flash`). The last column is an independent check
+computed with plain Python straight from the CSV:
+
+| Question | SQL written by Gemini | Answer | Independent check |
+| --- | --- | --- | --- |
+| How many products are there in total? | `SELECT COUNT(product_id) AS total_products FROM ut_1_stationery_products` | 4,000 | 4,000 ✔ |
+| What is the average price of Pens? | `SELECT AVG(unit_price_inr) AS average_pen_price ... WHERE lower(category) = 'pens'` | 96.863… (≈ ₹96.86; the table cell shows 96.86) | 96.86 ✔ |
+| Which brand has the highest total stock value (price times quantity)? | `SELECT brand, ROUND(SUM(unit_price_inr * stock_quantity), 2) ... GROUP BY brand ORDER BY ... DESC LIMIT 1` | Camlin, 24,419,818.25 | Camlin, 24,419,818.25 ✔ |
+| Show the 5 most expensive products in Notebooks | `SELECT product_name, brand, unit_price_inr ... WHERE lower(category) = 'notebooks' ORDER BY unit_price_inr DESC LIMIT 5` | Navneet Diary 2026 (319.88), Camlin Spiral Notebook A4 (319.79), Camlin Long Notebook 172pg (317.93), Classmate Register 200pg (317.67), Camlin Drawing Book (316.80) | same 5 ✔ |
+| How many products have stock below 20, per category? | `SELECT category, COUNT(product_id) ... WHERE stock_quantity < 20 GROUP BY category ORDER BY ... DESC` | Markers & Highlighters 18, Files & Folders 18, Notebooks 15, Pens 13, Geometry Boxes 13, Pencils 12, Office Supplies 12, Paper 11, Erasers & Sharpeners 10, Adhesives 9, Art & Craft 8 | same counts ✔ |
+
+The full raw output (question, SQL, rows) is in [`docs/example_run.json`](docs/example_run.json).
+To regenerate the screenshots and this run yourself:
+`pip install playwright`, set `GEMINI_API_KEY`, then `python scripts/make_screenshots.py`
+(uses your installed Microsoft Edge; the free Gemini tier is rate-limited, so it paces itself).
+
+> Only 5 questions were run, so this shows the idea works, not that Gemini is always right.
+> Always glance at the SQL for numbers you rely on.
+
 ## How Ask DukaanLens works
 
 1. The app tells Gemini which tables you may query (names, types, a few example values).

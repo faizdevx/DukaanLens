@@ -228,6 +228,22 @@ def test_call_gemini_maps_http_errors(monkeypatch):
     assert "permission denied" in str(exc.value) and "SECRET-KEY" not in str(exc.value)
 
 
+def test_call_gemini_retries_when_overloaded(monkeypatch):
+    attempts = []
+
+    def flaky(request, timeout):
+        attempts.append(1)
+        if len(attempts) < 3:
+            raise urllib.error.HTTPError(request.full_url, 503, "Unavailable", {}, None)
+        payload = {"candidates": [{"content": {"parts": [{"text": "fine"}]}}]}
+        return _Response(json.dumps(payload).encode())
+
+    monkeypatch.setattr("urllib.request.urlopen", flaky)
+    monkeypatch.setattr(ai_sql.time, "sleep", lambda s: None)
+    assert ai_sql.call_gemini("k" * 30, "gemini-2.5-flash", "s", "p") == "fine"
+    assert len(attempts) == 3
+
+
 def test_model_name_is_validated():
     with pytest.raises(ai_sql.AiError):
         ai_sql.call_gemini("k" * 30, "../evil?x=", "s", "p")

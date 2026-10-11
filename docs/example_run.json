@@ -1,0 +1,191 @@
+{
+  "gemini_answers": [
+    {
+      "question": "How many products are there in total?",
+      "answer": "There are 4,000 products in total.",
+      "sql": "SELECT COUNT(product_id) AS total_products FROM ut_1_stationery_products",
+      "columns": [
+        "total_products"
+      ],
+      "rows": [
+        [
+          4000
+        ]
+      ],
+      "notes": [
+        "Counts all product IDs in the stationery products table to get the total number of products."
+      ]
+    },
+    {
+      "question": "What is the average price of Pens?",
+      "answer": "The average price of Pens is 96.86315028901734.",
+      "sql": "SELECT AVG(unit_price_inr) AS average_pen_price FROM ut_1_stationery_products WHERE lower(category) = 'pens'",
+      "columns": [
+        "average_pen_price"
+      ],
+      "rows": [
+        [
+          96.86315028901734
+        ]
+      ],
+      "notes": [
+        "I am calculating the average unit price for all products where the category is 'Pens'."
+      ]
+    },
+    {
+      "question": "Which brand has the highest total stock value (price times quantity)?",
+      "answer": "Camlin has the highest total stock value at 24,419,818.25.",
+      "sql": "SELECT brand, ROUND(SUM(unit_price_inr * stock_quantity), 2) AS total_stock_value FROM ut_1_stationery_products GROUP BY brand ORDER BY total_stock_value DESC LIMIT 1",
+      "columns": [
+        "brand",
+        "total_stock_value"
+      ],
+      "rows": [
+        [
+          "Camlin",
+          24419818.25
+        ]
+      ],
+      "notes": [
+        "This query calculates the total stock value for each brand by multiplying unit price by stock quantity and summing it up, then finds the brand with the highest total stock value."
+      ]
+    },
+    {
+      "question": "Show the 5 most expensive products in Notebooks",
+      "answer": "The 5 most expensive notebooks are: Navneet Diary 2026 (Navneet) at 319.88 INR, Camlin Spiral Notebook A4 (Camlin) at 319.79 INR, Camlin Long Notebook 172pg (Camlin) at 317.93 INR, Classmate Register 200pg (Classmate) at 317.67 INR, and Camlin Drawing Book (Camlin) at 316.80 INR.",
+      "sql": "SELECT product_name, brand, unit_price_inr FROM ut_1_stationery_products WHERE lower(category) = 'notebooks' ORDER BY unit_price_inr DESC LIMIT 5",
+      "columns": [
+        "product_name",
+        "brand",
+        "unit_price_inr"
+      ],
+      "rows": [
+        [
+          "Navneet Diary 2026",
+          "Navneet",
+          319.88
+        ],
+        [
+          "Camlin Spiral Notebook A4",
+          "Camlin",
+          319.79
+        ],
+        [
+          "Camlin Long Notebook 172pg",
+          "Camlin",
+          317.93
+        ],
+        [
+          "Classmate Register 200pg",
+          "Classmate",
+          317.67
+        ],
+        [
+          "Camlin Drawing Book",
+          "Camlin",
+          316.8
+        ]
+      ],
+      "notes": [
+        "This query filters for products in the 'Notebooks' category, orders them by unit price in descending order, and returns the top 5."
+      ]
+    },
+    {
+      "question": "How many products have stock below 20, per category?",
+      "answer": "Here's the count of products with stock below 20, per category: Markers & Highlighters (18), Files & Folders (18), Notebooks (15), Pens (13), Geometry Boxes (13), Pencils (12), Office Supplies (12), Paper (11), Erasers & Sharpeners (10), Adhesives (9), and Art & Craft (8).",
+      "sql": "SELECT category, COUNT(product_id) AS low_stock_products_count FROM ut_1_stationery_products WHERE stock_quantity < 20 GROUP BY category ORDER BY low_stock_products_count DESC;",
+      "columns": [
+        "category",
+        "low_stock_products_count"
+      ],
+      "rows": [
+        [
+          "Markers & Highlighters",
+          18
+        ],
+        [
+          "Files & Folders",
+          18
+        ],
+        [
+          "Notebooks",
+          15
+        ],
+        [
+          "Pens",
+          13
+        ],
+        [
+          "Geometry Boxes",
+          13
+        ],
+        [
+          "Pencils",
+          12
+        ],
+        [
+          "Office Supplies",
+          12
+        ],
+        [
+          "Paper",
+          11
+        ],
+        [
+          "Erasers & Sharpeners",
+          10
+        ],
+        [
+          "Adhesives",
+          9
+        ]
+      ],
+      "notes": [
+        "This query counts products with stock below 20, grouped by their respective categories."
+      ]
+    }
+  ],
+  "expected": {
+    "count": 4000,
+    "avg_pen_price": 96.86,
+    "top_brand_by_stock_value": [
+      "Camlin",
+      24419818.25
+    ],
+    "top5_notebooks": [
+      [
+        "Navneet Diary 2026",
+        319.88
+      ],
+      [
+        "Camlin Spiral Notebook A4",
+        319.79
+      ],
+      [
+        "Camlin Long Notebook 172pg",
+        317.93
+      ],
+      [
+        "Classmate Register 200pg",
+        317.67
+      ],
+      [
+        "Camlin Drawing Book",
+        316.8
+      ]
+    ],
+    "low_stock_per_category": {
+      "Adhesives": 9,
+      "Art & Craft": 8,
+      "Erasers & Sharpeners": 10,
+      "Files & Folders": 18,
+      "Geometry Boxes": 13,
+      "Markers & Highlighters": 18,
+      "Notebooks": 15,
+      "Office Supplies": 12,
+      "Paper": 11,
+      "Pencils": 12,
+      "Pens": 13
+    }
+  }
+}

@@ -12,6 +12,7 @@ the generated SQL and (for step 5) up to 30 result rows. Nothing else.
 """
 import json
 import re
+import time
 import urllib.error
 import urllib.request
 from dataclasses import dataclass, field
@@ -57,10 +58,22 @@ def call_gemini(api_key, model, system, prompt, want_json=True, timeout=45):
     request = urllib.request.Request(
         GEMINI_URL.format(model=model), data=body, method="POST",
         headers={"Content-Type": "application/json", "x-goog-api-key": api_key})
-    try:
-        with urllib.request.urlopen(request, timeout=timeout) as response:
-            data = json.load(response)
-    except urllib.error.HTTPError as exc:
+    data = None
+    for attempt in range(3):                     # Gemini sometimes answers 503 "overloaded"
+        try:
+            with urllib.request.urlopen(request, timeout=timeout) as response:
+                data = json.load(response)
+            break
+        except urllib.error.HTTPError as exc:
+            if exc.code == 503 and attempt < 2:
+                time.sleep(2 * (attempt + 1))
+                continue
+            data = exc
+            break
+        except (urllib.error.URLError, TimeoutError, OSError):
+            raise AiError("Could not reach Gemini. Check your internet connection.") from None
+    if isinstance(data, urllib.error.HTTPError):
+        exc = data
         messages = {
             400: "Gemini rejected the request. Check that your API key and model name are valid.",
             401: "Gemini says the API key is not valid.",
@@ -69,8 +82,6 @@ def call_gemini(api_key, model, system, prompt, want_json=True, timeout=45):
             429: "Gemini rate limit or quota reached. Wait a bit and try again.",
         }
         raise AiError(messages.get(exc.code, f"Gemini returned an error (HTTP {exc.code}).")) from None
-    except (urllib.error.URLError, TimeoutError, OSError):
-        raise AiError("Could not reach Gemini. Check your internet connection.") from None
     try:
         parts = data["candidates"][0]["content"]["parts"]
         return "".join(p.get("text", "") for p in parts).strip()
@@ -158,13 +169,20 @@ def table_source(table):
 
 
 def table_suggestions(table):
-    nums = [c["name"] for c in table.columns if c["type"] in ("INTEGER", "REAL")]
-    texts = [c["name"] for c in table.columns if c["type"] == "TEXT"]
+    def id_like(name):
+        return name == "id" or name.endswith("_id") or name.startswith("id_")
+
+    nums = [c["name"] for c in table.columns
+            if c["type"] in ("INTEGER", "REAL") and not id_like(c["name"])]
+    # prefer columns with a small set of repeating values (brand, city, category ...)
+    texts = [c["name"] for c in table.columns
+             if c["type"] == "TEXT" and c.get("values") and not id_like(c["name"])]
     ideas = ["How many rows are there?", "Show the first 10 rows"]
     if nums:
-        ideas.append(f"What is the total {nums[0].replace('_', ' ')}?")
+        ideas.append(f"What is the average {nums[0].replace('_', ' ')}?")
     if nums and texts:
-        ideas.append(f"Which {texts[0].replace('_', ' ')} has the highest {nums[0].replace('_', ' ')}?")
+        ideas.append(f"Which {texts[0].replace('_', ' ')} has the highest total "
+                     f"{nums[0].replace('_', ' ')}?")
     return ideas
 
 
