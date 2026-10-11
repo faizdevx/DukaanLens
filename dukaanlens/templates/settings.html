@@ -29,6 +29,47 @@
       </div>
     </div>
   </div>
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header"><i class="bi bi-stars"></i> Gemini API key (powers Ask DukaanLens)</div>
+      <div class="card-body">
+        {% if key_record %}
+          <p class="mb-2"><span class="badge bg-success">Key saved</span> ending in <code>…{{ key_record.key_hint }}</code>, model <code>{{ key_record.model }}</code>.</p>
+        {% elif env_key %}
+          <p class="mb-2"><span class="badge bg-info">Using the server's GEMINI_API_KEY</span> (default model <code>{{ default_model }}</code>). You can add your own below.</p>
+        {% else %}
+          <p class="mb-2"><span class="badge bg-warning text-dark">No key</span> Ask DukaanLens will not work until you add one. Get a free key at <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Google AI Studio</a>.</p>
+        {% endif %}
+        {% if not can_store_keys %}
+          <div class="alert alert-warning">Set <code>SECRET_KEY</code> in <code>.env</code> and restart before saving a key.</div>
+        {% endif %}
+        <form method="post" class="row g-2 align-items-end">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <input type="hidden" name="action" value="gemini_save">
+          <div class="col-md-6">
+            <label class="form-label" for="api_key">API key</label>
+            <input class="form-control" type="password" id="api_key" name="api_key" autocomplete="off" required>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label" for="model">Model</label>
+            <input class="form-control" id="model" name="model" value="{{ key_record.model if key_record else default_model }}">
+          </div>
+          <div class="col-md-2"><button class="btn btn-primary w-100">Save</button></div>
+        </form>
+        {% if key_record %}
+        <form method="post" class="mt-2">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <input type="hidden" name="action" value="gemini_remove">
+          <button class="btn btn-sm btn-outline-danger">Remove saved key</button>
+        </form>
+        {% endif %}
+        <p class="text-muted small mt-3 mb-0"><strong>Privacy:</strong> the key is stored encrypted and never shown again.
+          When you ask a question, Google receives your question, the table and column names
+          (with a few example values), the generated SQL and up to 30 result rows so Gemini can write the answer.
+          Your key is used only for your own questions.</p>
+      </div>
+    </div>
+  </div>
   <div class="col-lg-6">
     <div class="card">
       <div class="card-header">Change password</div>

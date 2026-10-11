@@ -2,18 +2,25 @@
 {% block title %}Ask DukaanLens{% endblock %}
 {% block content %}
 <h1 class="h3 mb-1">Ask DukaanLens</h1>
-<p class="text-muted">Ask about your own numbers in plain English. Answers come from fixed, read-only
-  queries on your data, and you can see the exact SQL used.</p>
+<p class="text-muted">Ask in plain English. Your question is converted to a read-only SQL query,
+  run on your own data, and you can see the exact SQL used.</p>
+
+{% if not has_key %}
+<div class="alert alert-warning">Ask DukaanLens uses Gemini. <a href="{{ url_for('main.settings') }}">Add your Gemini API key in Settings</a> to start.</div>
+{% endif %}
+<div class="mb-3" style="max-width: 420px;">
+  <label class="form-label small" for="source">Ask about</label>
+  <select id="source" class="form-select form-select-sm">
+    <option value="records" {{ 'selected' if selected == 'records' }}>My shop records (dashboard data)</option>
+    {% for t in tables %}
+      <option value="{{ t.id }}" {{ 'selected' if selected == t.id|string }}>Uploaded: {{ t.name }}</option>
+    {% endfor %}
+  </select>
+  {% if not tables %}<div class="form-text">Upload a CSV under <a href="{{ url_for('uploads.list_uploads') }}">Upload Data</a> to ask about it here.</div>{% endif %}
+</div>
 
 <div class="card chat-card">
-  <div id="chat-log" class="chat-log">
-    <div class="bubble bot">
-      Hi! Ask me something like:
-      <div class="chips mt-2">
-        {% for s in suggestions %}<button type="button" class="btn btn-sm btn-outline-primary chip">{{ s }}</button>{% endfor %}
-      </div>
-    </div>
-  </div>
+  <div id="chat-log" class="chat-log"></div>
   <form id="chat-form" class="chat-input" autocomplete="off">
     <input id="chat-message" class="form-control" maxlength="300" placeholder="Type your question..." required>
     <button class="btn btn-primary"><i class="bi bi-send"></i> Ask</button>
@@ -22,6 +29,11 @@
 {% endblock %}
 
 {% block scripts %}
-<script>window.CSRF_TOKEN = {{ csrf_token | tojson }}; window.ASK_URL = {{ url_for('chat.ask') | tojson }};</script>
+<script>
+  window.CSRF_TOKEN = {{ csrf_token | tojson }};
+  window.ASK_URL = {{ url_for('chat.ask') | tojson }};
+  window.RECORD_SUGGESTIONS = {{ suggestions | tojson }};
+  window.TABLES = {{ tables | tojson }};
+</script>
 <script src="{{ url_for('static', filename='js/assistant.js') }}"></script>
 {% endblock %}

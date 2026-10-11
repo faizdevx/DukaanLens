@@ -1,7 +1,6 @@
-"""The ONLY SQL this app runs for the assistant and dashboard.
+"""Fixed, read-only SELECT templates used by the dashboard and budget pages.
 
-Every query is a fixed, read-only SELECT template. Users never type SQL:
-the assistant only picks a template by name and fills in :parameters.
+(Questions typed into Ask DukaanLens are handled by ai_sql.py + sandbox.py instead.)
 Every template must filter on :user_id, so one user can never see another's data.
 """
 import re
@@ -39,18 +38,6 @@ FROM financial_records
 WHERE user_id = :user_id AND date >= :start AND date < :end
 """,
     },
-    "monthly_revenue": {
-        "params": ["start", "end"],
-        "sql": """
-SELECT strftime('%Y-%m', date) AS month,
-       ROUND(SUM(actual_amount), 2) AS revenue
-FROM financial_records
-WHERE user_id = :user_id AND transaction_type = 'revenue'
-  AND date >= :start AND date < :end
-GROUP BY month
-ORDER BY month
-""",
-    },
     "monthly_summary": {
         "params": ["start", "end"],
         "sql": """
@@ -63,33 +50,6 @@ GROUP BY month
 ORDER BY month
 """,
     },
-    "category_spend": {
-        "params": ["category", "start", "end"],
-        "sql": """
-SELECT category,
-       ROUND(SUM(actual_amount), 2) AS total_spent,
-       COUNT(*) AS entries
-FROM financial_records
-WHERE user_id = :user_id
-  AND transaction_type IN ('expense', 'cogs')
-  AND lower(category) = lower(:category)
-  AND date >= :start AND date < :end
-GROUP BY lower(category)
-""",
-    },
-    "expenses_by_category": {
-        "params": ["start", "end"],
-        "sql": """
-SELECT category,
-       ROUND(SUM(actual_amount), 2) AS total_spent
-FROM financial_records
-WHERE user_id = :user_id
-  AND transaction_type IN ('expense', 'cogs')
-  AND date >= :start AND date < :end
-GROUP BY lower(category)
-ORDER BY total_spent DESC
-""",
-    },
     "budget_status": {
         "params": ["start_month", "end_month"],
         "sql": _BUDGET_BODY + "ORDER BY b.month, b.category\n",
@@ -99,15 +59,6 @@ ORDER BY total_spent DESC
         "sql": _BUDGET_BODY
         + "HAVING COALESCE(SUM(r.actual_amount), 0) > b.limit_amount\n"
         + "ORDER BY b.month, b.category\n",
-    },
-    "categories": {
-        "params": [],
-        "sql": """
-SELECT DISTINCT category
-FROM financial_records
-WHERE user_id = :user_id
-ORDER BY lower(category)
-""",
     },
 }
 

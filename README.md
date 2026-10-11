@@ -1,22 +1,24 @@
 # DukaanLens
 
 A finance dashboard for small shop owners. Track revenue, costs and budgets,
-then ask questions about your own numbers in plain English.
+upload your own CSV files, and ask questions about your data in plain English.
 
-**Stack:** Python, Flask, SQLite, SQLAlchemy, Flask-Login, Bootstrap, vanilla JavaScript.
-One repository, one process, no Docker, no paid APIs.
+**Stack:** Python, Flask, SQLite, SQLAlchemy, Flask-Login, Bootstrap, vanilla JavaScript,
+Google Gemini (each user brings their own free API key). One repository, one process, no Docker.
 
 ## Features
 
-- **Accounts:** register, log in, log out. Passwords are hashed. Every user sees only their own data.
-- **Shop setup:** on first login enter shop name, establishment date, starting capital, revenue, COGS,
-  operating expenses and owner withdrawals.
-- **Dashboard:** revenue, COGS, gross profit, expenses, net profit, owner withdrawals, and a clearly
+- **Accounts:** register, log in, log out, hashed passwords, strict per-user data isolation.
+- **Shop setup:** shop name, establishment date, starting capital, revenue, COGS, operating
+  expenses and owner withdrawals.
+- **Dashboard:** revenue, COGS, gross profit, expenses, net profit, owner withdrawals and a clearly
   labelled *estimated* cash figure. Monthly chart and budget alerts.
-- **Financial records:** add, edit, delete, filter (type, category, dates, text) and export CSV.
-- **Budget sheets:** a monthly limit per category, with spent / remaining / over-limit status.
-- **Ask DukaanLens:** a chat that turns questions into approved, read-only SQL templates and shows
-  the answer, the SQL used and the result rows.
+- **Financial records:** add, edit, delete, filter and export CSV.
+- **Budget sheets:** a monthly limit per category with spent / remaining / over-limit status.
+- **Upload Data:** upload any CSV. It becomes a real SQLite table with detected column types
+  (integer, decimal, date, text).
+- **Ask DukaanLens (AI):** type a question; Gemini writes a SQL query; the app runs it in a
+  read-only sandbox and Gemini phrases the answer. You see the SQL and the result rows.
 
 ## Setup
 
@@ -30,19 +32,52 @@ cp .env.example .env        # then put a real SECRET_KEY inside
 python run.py               # open http://127.0.0.1:5000
 ```
 
-Optional demo data (user `demo`, password `demo12345`, six months of sample records and budgets):
+Then: **Settings → Gemini API key**. Get a free key from <https://aistudio.google.com/apikey>.
+The key is verified with a tiny test request, then stored encrypted.
+
+Optional demo data (user `demo`, password `demo12345`):
 
 ```bash
 flask --app run seed-demo
 ```
 
-Run the tests:
+A sample CSV to try uploading is in `sample_data/sales_sample.csv`.
+
+Run the tests (Gemini is faked in the tests, no key or network needed):
 
 ```bash
 python -m pytest
 ```
 
-## How the numbers work
+## How Ask DukaanLens works
+
+1. The app tells Gemini which tables you may query (names, types, a few example values).
+   For **My shop records** these are temporary copies of *your* rows only
+   (`shop_records`, `shop_budgets`, `shop_info`). For uploads it is the one uploaded table.
+2. Gemini returns one SQLite `SELECT` as JSON, or a clarifying question.
+3. `sandbox.py` runs it:
+   - single statement, must start with `SELECT`/`WITH`, no comments or write keywords;
+   - a SQLite **authorizer** lets SQLite itself refuse every table except the allowed ones and
+     every function except a short allowlist;
+   - 3-second time limit and 200-row cap.
+4. If SQLite reports an error, Gemini gets the error once to correct the query.
+5. Gemini writes a one-or-two-sentence answer from the real result rows.
+
+### Privacy: what is sent to Google
+
+Your question, the table/column names and types, a few example values per text column, the
+generated SQL, and up to 30 result rows (for the final sentence). Nothing else. Your API key is
+sent only as the `x-goog-api-key` header.
+
+### Honest limits
+
+- Gemini is not perfect: it can misread a question or write the wrong query. That is why the SQL
+  and a one-line "how I read it" are always shown. Check them for important numbers.
+- The sandbox guarantees *safety* (read-only, only your data), not *correctness*.
+- Without an API key, Ask DukaanLens does not answer: there is no offline fallback.
+- Quota, rate limits and costs are those of your own Gemini key.
+
+## Numbers
 
 | Metric | Formula |
 | --- | --- |
@@ -52,46 +87,26 @@ python -m pytest
 | Estimated cash | Starting capital + Net profit − Owner withdrawals |
 
 Estimated cash is only a guess: it assumes every sale was paid in cash and every cost was paid
-immediately (no credit, no unpaid bills, no stock sitting on shelves).
+immediately. Opening figures from shop setup are saved as ordinary records in category
+*Opening balance*.
 
-The opening figures from shop setup are saved as ordinary records in category *Opening balance*,
-so the dashboard and the assistant use one source of truth: the `financial_records` table.
+## CSV upload rules
 
-### Transaction types
-
-`revenue`, `cogs` (cost of goods sold, e.g. stock purchases), `expense` (operating expense),
-`withdrawal` (owner takes money out).
-
-## Ask DukaanLens: how it works
-
-1. Keyword rules find the **intent** (expenses, profit, budget, ...).
-2. A small parser finds the **period** ("last month", "this year", "March 2026", "all time").
-3. Your own category names are matched in the sentence.
-4. The matching **predefined SQL template** in [`dukaanlens/queries.py`](dukaanlens/queries.py) runs
-   with bound parameters. Missing information triggers a follow-up question.
-
-Questions it understands, for example:
-
-- What were my total expenses last month?
-- Which budget categories exceeded their limits?
-- How much profit did I make this year?
-- Show monthly revenue
-- How much did I spend on inventory?
-- Also: gross profit, owner withdrawals, estimated cash, biggest spending category, budget status.
-
-Anything else gets an "I can't answer that" message with examples. User text is **never** turned
-into SQL.
+- UTF-8 or Latin-1; delimiter `,` `;` tab or `|` detected automatically; first row is the header.
+- Up to 5 MB, 20,000 rows, 50 columns, 10 tables per user.
+- Headers become safe names (`Unit Price (Rs)` → `unit_price_rs`).
+- Types: integers and decimals (commas, `₹`, `$`, `Rs.` allowed), dates (`2026-03-15`,
+  `15/03/2026` read as **day first**), otherwise text. IDs/phones with leading zeros stay text.
+- Empty cells become NULL.
 
 ## Security notes
 
-- Passwords hashed with Werkzeug; secrets (`SECRET_KEY`, `DATABASE_URL`) come from environment
-  variables / `.env` (git-ignored).
-- All queries filter by the logged-in user's id; records and budgets are looked up with their owner's
-  id, so other users' ids return 404.
-- Assistant queries are fixed read-only `SELECT` templates, checked at import time (no writes, no
-  semicolons, must filter by `:user_id`).
-- CSRF token on every POST, form validation on every input, CSV export neutralises spreadsheet
-  formulas, redirects after login are restricted to local paths.
+- Passwords hashed (Werkzeug); API keys encrypted with Fernet using a key derived from
+  `SECRET_KEY` (so `SECRET_KEY` must be set to save a key, and must not change).
+- CSRF token on every POST; input validation; CSV export neutralises spreadsheet formulas.
+- Uploaded table names are `ut_<user id>_<name>` made of `[a-z0-9_]` only; rows are inserted with
+  bound parameters; AI-generated SQL never touches other users' data or app tables.
+- Treat the Gemini key like a password: use a key with a quota limit.
 
 ## Project layout
 
@@ -99,17 +114,16 @@ into SQL.
 run.py                    start the app
 dukaanlens/
   __init__.py             app factory, CSRF, config
-  models.py               User, Shop, FinancialRecord, Budget
-  auth.py main.py records.py budgets.py chat.py   routes (blueprints)
-  finance.py              profit / cash calculations
-  queries.py              approved read-only SQL templates
-  assistant.py periods.py intent + period parsing
+  models.py               User, Shop, FinancialRecord, Budget, UploadedTable, ApiKey
+  auth.py main.py records.py budgets.py uploads.py chat.py   routes (blueprints)
+  ai_sql.py               Gemini prompts, schema building, answer pipeline
+  sandbox.py              read-only SQL sandbox (authorizer, limits)
+  csv_import.py           CSV -> typed SQLite table
+  apikeys.py              encrypted Gemini key storage
+  finance.py queries.py   dashboard calculations and fixed queries
   seed.py                 demo data
   templates/ static/      Bootstrap UI, CSS, JS
-tests/                    pytest: auth, data isolation, finance, assistant
+tests/                    pytest: auth, isolation, finance, uploads, AI pipeline (faked Gemini)
 ```
 
-## Limitations
-
-Amounts are stored as floats (fine for learning; use integer paise or `Decimal` for real
-accounting). The assistant is rule-based, so it understands a limited set of phrasings.
+Amounts are stored as floats (fine for learning; use `Decimal`/integer paise for real accounting).

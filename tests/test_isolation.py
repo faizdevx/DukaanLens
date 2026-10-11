@@ -46,10 +46,20 @@ def test_cannot_touch_other_users_budget(app, client):
     assert client.post(f"/budgets/{budget_id}/delete").status_code == 404
 
 
-def test_assistant_only_sees_own_data(app, client):
-    two_users(app)
+def test_assistant_only_sees_own_data(app, client, monkeypatch):
+    from dukaanlens import ai_sql, apikeys
+    alice, _ = two_users(app)
+    with app.app_context():
+        apikeys.save_key(alice, "k" * 30, "test-model")
+    replies = iter(['{"sql": "SELECT SUM(actual_amount) AS total FROM shop_records", '
+                    '"explanation": "sum"}', "Total is 111."])
+    prompts = []
+
+    def fake(api_key, model, system, prompt, want_json=True, timeout=45):
+        prompts.append(prompt)
+        return next(replies)
+    monkeypatch.setattr(ai_sql, "call_gemini", fake)
     login(client, "alice")
-    r = client.post_json("/assistant/ask", {"message": "how much did I spend on bob stuff?"})
-    assert "couldn't find a category" in r.get_json()["answer"]
-    r = client.post_json("/assistant/ask", {"message": "total expenses this year"})
-    assert "111.00" in r.get_json()["answer"]
+    body = client.post_json("/assistant/ask", {"message": "total?", "source": "records"}).get_json()
+    assert body["rows"] == [[111.0]]                    # Bob's 222 is not included
+    assert "Bob Stuff" not in prompts[0]

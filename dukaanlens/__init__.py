@@ -21,7 +21,7 @@ def create_app(test_config=None):
         or "sqlite:///" + os.path.join(app.instance_path, "dukaanlens.db"),
         SESSION_COOKIE_HTTPONLY=True,
         SESSION_COOKIE_SAMESITE="Lax",
-        MAX_CONTENT_LENGTH=1024 * 1024,
+        MAX_CONTENT_LENGTH=5 * 1024 * 1024,
     )
     if test_config:
         app.config.update(test_config)
@@ -36,9 +36,16 @@ def create_app(test_config=None):
     from .chat import bp as chat_bp
     from .main import bp as main_bp
     from .records import bp as records_bp
+    from .uploads import bp as uploads_bp
 
-    for blueprint in (auth_bp, main_bp, records_bp, budgets_bp, chat_bp):
+    for blueprint in (auth_bp, main_bp, records_bp, budgets_bp, uploads_bp, chat_bp):
         app.register_blueprint(blueprint)
+
+    @app.errorhandler(413)
+    def file_too_large(error):
+        from flask import flash, redirect, url_for
+        flash("That file is too large (maximum 5 MB).", "danger")
+        return redirect(url_for("uploads.list_uploads"))
 
     # --- CSRF protection: every POST must carry the token stored in the session.
     @app.before_request

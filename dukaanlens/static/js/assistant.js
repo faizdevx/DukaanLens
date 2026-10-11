@@ -69,22 +69,57 @@ function renderReply(reply) {
     bubble.appendChild(details);
   }
 
+  if (reply.notes && reply.notes.length) {
+    const how = document.createElement("div");
+    how.className = "small text-muted mt-2";
+    how.textContent = "How I read it: " + reply.notes.join(" · ");
+    bubble.appendChild(how);
+  }
+
   if (reply.suggestions && reply.suggestions.length) addChips(bubble, reply.suggestions);
   log.scrollTop = log.scrollHeight;
 }
 
+const sourceSelect = document.getElementById("source");
+
+function welcome() {
+  log.textContent = "";
+  const bubble = addBubble("bot");
+  const table = window.TABLES.find((t) => String(t.id) === sourceSelect.value);
+  const intro = document.createElement("div");
+  if (table) {
+    intro.textContent = "Ask about the uploaded table '" + table.name + "'. Columns: " +
+      table.columns.join(", ") + ". Try:";
+    bubble.appendChild(intro);
+    addChips(bubble, table.suggestions);
+  } else {
+    intro.textContent = "Hi! Ask me something like:";
+    bubble.appendChild(intro);
+    addChips(bubble, window.RECORD_SUGGESTIONS);
+  }
+}
+sourceSelect.addEventListener("change", () => { history = []; welcome(); });
+welcome();
+
+let history = [];   // last few Q&A pairs, so follow-up answers have context
+
 async function ask(message) {
   addBubble("user").textContent = message;
+  const thinking = addBubble("bot");
+  thinking.textContent = "Thinking...";
   try {
     const response = await fetch(window.ASK_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json", "X-CSRF-Token": window.CSRF_TOKEN },
-      body: JSON.stringify({ message }),
+      body: JSON.stringify({ message, source: sourceSelect.value, history }),
     });
     if (!response.ok) throw new Error("Server said " + response.status);
-    renderReply(await response.json());
+    const reply = await response.json();
+    thinking.remove();
+    renderReply(reply);
+    history = history.concat([{ q: message, a: reply.answer }]).slice(-3);
   } catch (err) {
-    addBubble("bot").textContent = "Something went wrong. Please try again. (" + err.message + ")";
+    thinking.textContent = "Something went wrong. Please try again. (" + err.message + ")";
   }
 }
 

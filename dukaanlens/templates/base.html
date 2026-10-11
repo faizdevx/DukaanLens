@@ -28,6 +28,7 @@
       <li><a class="nav-link {{ 'active' if ep == 'main.dashboard' }}" href="{{ url_for('main.dashboard') }}"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
       <li><a class="nav-link {{ 'active' if ep.startswith('records.') }}" href="{{ url_for('records.list_records') }}"><i class="bi bi-journal-text"></i> Financial Records</a></li>
       <li><a class="nav-link {{ 'active' if ep.startswith('budgets.') }}" href="{{ url_for('budgets.list_budgets') }}"><i class="bi bi-piggy-bank"></i> Budget Sheets</a></li>
+      <li><a class="nav-link {{ 'active' if ep.startswith('uploads.') }}" href="{{ url_for('uploads.list_uploads') }}"><i class="bi bi-upload"></i> Upload Data</a></li>
       <li><a class="nav-link {{ 'active' if ep.startswith('chat.') }}" href="{{ url_for('chat.page') }}"><i class="bi bi-chat-dots"></i> Ask DukaanLens</a></li>
       <li><a class="nav-link {{ 'active' if ep == 'main.settings' }}" href="{{ url_for('main.settings') }}"><i class="bi bi-gear"></i> Settings</a></li>
     </ul>

@@ -1,0 +1,121 @@
+Order Date,Product,Category,City,Quantity,Unit Price,Amount
+2025-01-01,Shampoo,Personal Care,Jaipur,3,120,360
+2025-01-04,Rice 5kg,Grocery,Delhi,2,320,640
+2025-01-07,Shampoo,Personal Care,Delhi,10,120,1200
+2025-01-10,Pen Pack,Stationery,Delhi,1,60,60
+2025-01-13,Tea 500g,Grocery,Delhi,7,215,1505
+2025-01-16,Pen Pack,Stationery,Jaipur,2,60,120
+2025-01-19,Rice 5kg,Grocery,Delhi,10,320,3200
+2025-01-22,Pen Pack,Stationery,Delhi,10,60,600
+2025-01-25,Tea 500g,Grocery,Mumbai,1,215,215
+2025-01-28,Rice 5kg,Grocery,Mumbai,9,320,2880
+2025-01-31,Soap,Personal Care,Mumbai,7,38,266
+2025-02-03,Atta 10kg,Grocery,Pune,10,410,4100
+2025-02-06,Notebook,Stationery,Mumbai,2,45,90
+2025-02-09,Shampoo,Personal Care,Delhi,2,120,240
+2025-02-12,Rice 5kg,Grocery,Mumbai,10,320,3200
+2025-02-15,Biscuits,Snacks,Jaipur,9,25,225
+2025-02-18,Shampoo,Personal Care,Jaipur,8,120,960
+2025-02-21,Shampoo,Personal Care,Mumbai,5,120,600
+2025-02-24,Notebook,Stationery,Delhi,4,45,180
+2025-02-27,Soap,Personal Care,Jaipur,9,38,342
+2025-03-02,Shampoo,Personal Care,Pune,8,120,960
+2025-03-05,Atta 10kg,Grocery,Jaipur,2,410,820
+2025-03-08,Notebook,Stationery,Mumbai,6,45,270
+2025-03-11,Biscuits,Snacks,Delhi,7,25,175
+2025-03-14,Atta 10kg,Grocery,Pune,9,410,3690
+2025-03-17,Shampoo,Personal Care,Jaipur,6,120,720
+2025-03-20,Biscuits,Snacks,Delhi,2,25,50
+2025-03-23,Soap,Personal Care,Delhi,8,38,304
+2025-03-26,Rice 5kg,Grocery,Jaipur,5,320,1600
+2025-03-29,Soap,Personal Care,Pune,7,38,266
+2025-04-01,Rice 5kg,Grocery,Pune,8,320,2560
+2025-04-04,Notebook,Stationery,Delhi,10,45,450
+2025-04-07,Biscuits,Snacks,Mumbai,1,25,25
+2025-04-10,Soap,Personal Care,Mumbai,3,38,114
+2025-04-13,Tea 500g,Grocery,Jaipur,7,215,1505
+2025-04-16,Atta 10kg,Grocery,Jaipur,3,410,1230
+2025-04-19,Tea 500g,Grocery,Pune,9,215,1935
+2025-04-22,Notebook,Stationery,Pune,7,45,315
+2025-04-25,Tea 500g,Grocery,Jaipur,6,215,1290
+2025-04-28,Pen Pack,Stationery,Delhi,3,60,180
+2025-05-01,Notebook,Stationery,Mumbai,3,45,135
+2025-05-04,Pen Pack,Stationery,Jaipur,1,60,60
+2025-05-07,Notebook,Stationery,Pune,5,45,225
+2025-05-10,Rice 5kg,Grocery,Jaipur,3,320,960
+2025-05-13,Shampoo,Personal Care,Pune,10,120,1200
+2025-05-16,Notebook,Stationery,Delhi,9,45,405
+2025-05-19,Biscuits,Snacks,Jaipur,9,25,225
+2025-05-22,Tea 500g,Grocery,Jaipur,7,215,1505
+2025-05-25,Atta 10kg,Grocery,Jaipur,8,410,3280
+2025-05-28,Rice 5kg,Grocery,Delhi,4,320,1280
+2025-05-31,Pen Pack,Stationery,Mumbai,8,60,480
+2025-06-03,Atta 10kg,Grocery,Delhi,6,410,2460
+2025-06-06,Atta 10kg,Grocery,Mumbai,1,410,410
+2025-06-09,Atta 10kg,Grocery,Delhi,6,410,2460
+2025-06-12,Atta 10kg,Grocery,Jaipur,4,410,1640
+2025-06-15,Notebook,Stationery,Pune,5,45,225
+2025-06-18,Shampoo,Personal Care,Delhi,8,120,960
+2025-06-21,Atta 10kg,Grocery,Jaipur,8,410,3280
+2025-06-24,Biscuits,Snacks,Pune,8,25,200
+2025-06-27,Atta 10kg,Grocery,Delhi,3,410,1230
+2025-06-30,Shampoo,Personal Care,Jaipur,5,120,600
+2025-07-03,Notebook,Stationery,Delhi,9,45,405
+2025-07-06,Pen Pack,Stationery,Pune,9,60,540
+2025-07-09,Notebook,Stationery,Delhi,9,45,405
+2025-07-12,Soap,Personal Care,Pune,2,38,76
+2025-07-15,Shampoo,Personal Care,Pune,3,120,360
+2025-07-18,Pen Pack,Stationery,Pune,9,60,540
+2025-07-21,Pen Pack,Stationery,Mumbai,10,60,600
+2025-07-24,Pen Pack,Stationery,Mumbai,7,60,420
+2025-07-27,Pen Pack,Stationery,Jaipur,9,60,540
+2025-07-30,Shampoo,Personal Care,Delhi,1,120,120
+2025-08-02,Soap,Personal Care,Pune,8,38,304
+2025-08-05,Pen Pack,Stationery,Pune,10,60,600
+2025-08-08,Biscuits,Snacks,Pune,6,25,150
+2025-08-11,Atta 10kg,Grocery,Delhi,4,410,1640
+2025-08-14,Pen Pack,Stationery,Mumbai,8,60,480
+2025-08-17,Shampoo,Personal Care,Jaipur,4,120,480
+2025-08-20,Rice 5kg,Grocery,Pune,8,320,2560
+2025-08-23,Atta 10kg,Grocery,Jaipur,2,410,820
+2025-08-26,Pen Pack,Stationery,Mumbai,8,60,480
+2025-08-29,Tea 500g,Grocery,Delhi,6,215,1290
+2025-09-01,Tea 500g,Grocery,Jaipur,8,215,1720
+2025-09-04,Atta 10kg,Grocery,Mumbai,3,410,1230
+2025-09-07,Notebook,Stationery,Mumbai,1,45,45
+2025-09-10,Biscuits,Snacks,Jaipur,3,25,75
+2025-09-13,Shampoo,Personal Care,Mumbai,3,120,360
+2025-09-16,Rice 5kg,Grocery,Delhi,1,320,320
+2025-09-19,Notebook,Stationery,Mumbai,7,45,315
+2025-09-22,Pen Pack,Stationery,Pune,1,60,60
+2025-09-25,Pen Pack,Stationery,Mumbai,5,60,300
+2025-09-28,Shampoo,Personal Care,Jaipur,5,120,600
+2025-10-01,Notebook,Stationery,Pune,1,45,45
+2025-10-04,Biscuits,Snacks,Jaipur,10,25,250
+2025-10-07,Notebook,Stationery,Mumbai,9,45,405
+2025-10-10,Rice 5kg,Grocery,Mumbai,8,320,2560
+2025-10-13,Rice 5kg,Grocery,Mumbai,3,320,960
+2025-10-16,Notebook,Stationery,Delhi,8,45,360
+2025-10-19,Rice 5kg,Grocery,Jaipur,6,320,1920
+2025-10-22,Atta 10kg,Grocery,Delhi,9,410,3690
+2025-10-25,Pen Pack,Stationery,Pune,4,60,240
+2025-10-28,Rice 5kg,Grocery,Jaipur,2,320,640
+2025-10-31,Rice 5kg,Grocery,Jaipur,2,320,640
+2025-11-03,Shampoo,Personal Care,Mumbai,10,120,1200
+2025-11-06,Soap,Personal Care,Jaipur,8,38,304
+2025-11-09,Pen Pack,Stationery,Pune,9,60,540
+2025-11-12,Pen Pack,Stationery,Mumbai,8,60,480
+2025-11-15,Tea 500g,Grocery,Jaipur,2,215,430
+2025-11-18,Biscuits,Snacks,Delhi,6,25,150
+2025-11-21,Pen Pack,Stationery,Delhi,7,60,420
+2025-11-24,Pen Pack,Stationery,Delhi,5,60,300
+2025-11-27,Notebook,Stationery,Mumbai,6,45,270
+2025-11-30,Soap,Personal Care,Jaipur,3,38,114
+2025-12-03,Pen Pack,Stationery,Jaipur,2,60,120
+2025-12-06,Biscuits,Snacks,Mumbai,3,25,75
+2025-12-09,Notebook,Stationery,Jaipur,7,45,315
+2025-12-12,Shampoo,Personal Care,Mumbai,7,120,840
+2025-12-15,Shampoo,Personal Care,Delhi,6,120,720
+2025-12-18,Shampoo,Personal Care,Pune,1,120,120
+2025-12-21,Biscuits,Snacks,Delhi,8,25,200
+2025-12-24,Tea 500g,Grocery,Pune,6,215,1290

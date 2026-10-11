@@ -1,4 +1,5 @@
 """Database models: users, shops, financial records and budgets."""
+import json
 from datetime import datetime, timezone
 
 from flask_login import UserMixin
@@ -88,6 +89,39 @@ class FinancialRecord(db.Model):
     @property
     def type_label(self):
         return TYPE_LABELS.get(self.transaction_type, self.transaction_type)
+
+
+class UploadedTable(db.Model):
+    """Metadata for a CSV the user uploaded. The rows live in their own SQLite table
+    called table_name (always starts with ut_<user id>_)."""
+    __tablename__ = "uploaded_tables"
+    __table_args__ = (db.UniqueConstraint("user_id", "table_name", name="uq_upload_user_table"),)
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False, index=True)
+    display_name = db.Column(db.String(60), nullable=False)
+    table_name = db.Column(db.String(100), nullable=False)
+    original_filename = db.Column(db.String(200), nullable=False)
+    row_count = db.Column(db.Integer, nullable=False, default=0)
+    columns_json = db.Column(db.Text, nullable=False)  # [{"name","type","values"}]
+    created_at = db.Column(db.DateTime, default=utcnow, nullable=False)
+
+    @property
+    def columns(self):
+        return json.loads(self.columns_json)
+
+
+class ApiKey(db.Model):
+    """A user's own Gemini API key, stored encrypted (see apikeys.py)."""
+    __tablename__ = "api_keys"
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), unique=True, nullable=False)
+    encrypted_key = db.Column(db.Text, nullable=False)
+    key_hint = db.Column(db.String(8), nullable=False, default="")   # last 4 characters
+    model = db.Column(db.String(60), nullable=False)
+    created_at = db.Column(db.DateTime, default=utcnow, nullable=False)
+    updated_at = db.Column(db.DateTime, default=utcnow, onupdate=utcnow, nullable=False)
 
 
 class Budget(db.Model):

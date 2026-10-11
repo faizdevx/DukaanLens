@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}{{ table.display_name }}{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+  <h1 class="h3 mb-0">{{ table.display_name }}</h1>
+  <div class="d-flex gap-2">
+    <a class="btn btn-primary" href="{{ url_for('chat.page', source=table.id) }}"><i class="bi bi-chat-dots"></i> Ask about this table</a>
+    <a class="btn btn-outline-secondary" href="{{ url_for('uploads.list_uploads') }}">All uploads</a>
+  </div>
+</div>
+<p class="text-muted">{{ "{:,}".format(table.row_count) }} rows from <code>{{ table.original_filename }}</code>.
+  SQL table: <code>{{ table.table_name }}</code></p>
+
+<div class="card mb-3">
+  <div class="card-header">Columns (types were detected automatically)</div>
+  <div class="table-responsive">
+    <table class="table table-sm mb-0">
+      <thead><tr><th>Column</th><th>Type</th><th>Known values</th></tr></thead>
+      <tbody>
+      {% for c in table.columns %}
+        <tr><td><code>{{ c.name }}</code></td><td>{{ c.type }}</td>
+          <td class="text-muted small">{% if c['values'] %}{{ c['values'][:8]|join(', ') }}{% if c['values']|length > 8 %}, …{% endif %}{% endif %}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">First 10 rows</div>
+  <div class="table-responsive">
+    <table class="table table-sm table-striped mb-0">
+      <thead><tr>{% for c in columns %}<th>{{ c }}</th>{% endfor %}</tr></thead>
+      <tbody>
+      {% for row in rows %}<tr>{% for cell in row %}<td>{{ '' if cell is none else cell }}</td>{% endfor %}</tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

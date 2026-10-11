@@ -7,6 +7,11 @@ from dukaanlens.extensions import db
 from dukaanlens.models import FinancialRecord, Shop, User
 
 
+SAMPLE_CSV = (b"Order Date,Product,City,Price\n"
+              b"2026-01-05,Rice,Delhi,100\n2026-02-10,Tea,Delhi,200\n"
+              b"2026-02-11,Soap,Pune,50\n")
+
+
 @pytest.fixture()
 def app(tmp_path):
     app = create_app({

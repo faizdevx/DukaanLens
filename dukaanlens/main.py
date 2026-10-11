@@ -1,10 +1,11 @@
 """Dashboard, first-login shop setup and settings."""
+import os
 from datetime import date
 
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
 
-from . import finance, queries
+from . import ai_sql, apikeys, finance, queries
 from .extensions import db
 from .models import FinancialRecord, Shop
 from .periods import ALL_TIME, month_period, period_from_key
@@ -119,6 +120,27 @@ def settings():
                 db.session.commit()
                 flash("Shop details updated.", "success")
                 return redirect(url_for("main.settings"))
+        elif action == "gemini_save":
+            api_key = request.form.get("api_key", "").strip()
+            model = request.form.get("model", "").strip() or apikeys.DEFAULT_MODEL
+            if not apikeys.can_store_keys():
+                flash("Set SECRET_KEY in your .env file before saving an API key "
+                      "(otherwise it cannot be decrypted after a restart).", "danger")
+            elif not 20 <= len(api_key) <= 200 or not api_key.isascii() or " " in api_key:
+                flash("That does not look like a Gemini API key.", "danger")
+            else:
+                try:
+                    ai_sql.verify_key(api_key, model)
+                except ai_sql.AiError as exc:
+                    flash(f"Key not saved: {exc}", "danger")
+                else:
+                    apikeys.save_key(current_user.id, api_key, model)
+                    flash("Gemini API key saved (encrypted).", "success")
+                    return redirect(url_for("main.settings"))
+        elif action == "gemini_remove":
+            apikeys.delete_key(current_user.id)
+            flash("Gemini API key removed.", "info")
+            return redirect(url_for("main.settings"))
         elif action == "password":
             current = request.form.get("current_password", "")
             new = request.form.get("new_password", "")
@@ -133,4 +155,7 @@ def settings():
                 db.session.commit()
                 flash("Password changed.", "success")
                 return redirect(url_for("main.settings"))
-    return render_template("settings.html", shop=shop)
+    return render_template("settings.html", shop=shop, key_record=apikeys.get_key_record(current_user.id),
+                           can_store_keys=apikeys.can_store_keys(),
+                           env_key=bool(os.environ.get("GEMINI_API_KEY")),
+                           default_model=apikeys.DEFAULT_MODEL)

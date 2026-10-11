@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Upload Data{% endblock %}
+{% block content %}
+<h1 class="h3 mb-3">Upload Data</h1>
+<p class="text-muted">Upload any CSV (one header row). DukaanLens stores it as its own SQL table in your
+  private database, guesses each column's type, and lets you ask questions about it in
+  <a href="{{ url_for('chat.page') }}">Ask DukaanLens</a>.</p>
+
+<div class="row g-3">
+  <div class="col-lg-5">
+    <div class="card">
+      <div class="card-header">Upload a CSV</div>
+      <div class="card-body">
+        <form method="post" enctype="multipart/form-data">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <div class="mb-3">
+            <label class="form-label" for="file">CSV file</label>
+            <input class="form-control" type="file" id="file" name="file" accept=".csv,text/csv" required>
+            <div class="form-text">Up to 5 MB, {{ "{:,}".format(limits.MAX_ROWS) }} rows, {{ limits.MAX_COLUMNS }} columns.
+              Dates like 2026-03-15 or 15/03/2026 (day first). Amounts may contain commas or ₹.</div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="name">Table name <small class="text-muted">(optional)</small></label>
+            <input class="form-control" id="name" name="name" maxlength="60" placeholder="defaults to the file name">
+          </div>
+          <button class="btn btn-primary"><i class="bi bi-upload"></i> Upload and create table</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-7">
+    {% if tables %}
+    <div class="card">
+      <ul class="list-group list-group-flush">
+        {% for t in tables %}
+        <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap gap-2">
+          <div>
+            <a class="fw-semibold" href="{{ url_for('uploads.detail', table_id=t.id) }}">{{ t.display_name }}</a><br>
+            <small class="text-muted">{{ "{:,}".format(t.row_count) }} rows · {{ t.columns|length }} columns · {{ t.original_filename }}</small>
+          </div>
+          <div class="d-flex gap-2">
+            <a class="btn btn-sm btn-outline-primary" href="{{ url_for('chat.page', source=t.id) }}"><i class="bi bi-chat-dots"></i> Ask</a>
+            <form method="post" action="{{ url_for('uploads.delete', table_id=t.id) }}" onsubmit="return confirm('Delete this table and all its rows?');">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+              <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+            </form>
+          </div>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <i class="bi bi-file-earmark-spreadsheet"></i>
+      <h2 class="h5">No uploaded tables yet</h2>
+      <p>Try the sample file in <code>sample_data/sales_sample.csv</code>.</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
