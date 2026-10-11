@@ -1,6 +1,6 @@
 # DukaanLens
 
-A beginner-friendly finance dashboard for small shop owners. Track revenue, costs and budgets,
+A finance dashboard for small shop owners. Track revenue, costs and budgets,
 then ask questions about your own numbers in plain English.
 
 **Stack:** Python, Flask, SQLite, SQLAlchemy, Flask-Login, Bootstrap, vanilla JavaScript.
